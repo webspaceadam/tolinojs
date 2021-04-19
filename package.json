@@ -13,6 +13,7 @@
     "tolinojs": "index.js"
   },
   "dependencies": {
-    "commander": "^7.2.0"
+    "commander": "^7.2.0",
+    "markdown-pdf": "^10.0.0"
   }
 }
