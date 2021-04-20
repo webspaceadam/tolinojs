@@ -1,4 +1,4 @@
-const fs = require('fs');
+import fs from 'fs';
 
 class BookNotes {
     constructor(title, notes) {
@@ -7,22 +7,38 @@ class BookNotes {
     }
 }
 
-const notes = JSON.parse(fs.readFileSync('test-json.json', 'utf-8'));
+/**
+ * Creates a sorted json file with books
+ * @param {string} filePath 
+ * @returns path to temporary sorted books file
+ */
+export function createSortedJsonFile(filePath) {
+    console.log("Sorting Books!");
 
-const allTitles = [];
-notes.forEach(note => {
-    if(!allTitles.includes(note.title) && note.title != undefined) {
-        allTitles.push(note.title)
-    }
-});
+    const notes = JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+    
+    const allTitles = [];
+    notes.forEach(note => {
+        if(!allTitles.includes(note.title) && note.title != undefined) {
+            allTitles.push(note.title)
+        }
+    });
+    
+    const books = allTitles.map(title => {
+        const correlatingNotes = notes.filter(note => note.title == title);
+        return new BookNotes(title, correlatingNotes);
+    });
+    
 
-const books = allTitles.map(title => {
-    const correlatingNotes = notes.filter(note => note.title == title);
-    return new BookNotes(title, correlatingNotes);
-});
+    console.log("Done with sorting Books!");
 
-const currentDate = new Date();
-console.log("Done!");
+    
+    // Save file
+    const sortedFileName = 'tmp-books.json'
+    fs.writeFileSync(sortedFileName, JSON.stringify(books));
 
-// Save file
-fs.writeFileSync(`${currentDate.getTime()}-books.json`, JSON.stringify(books));
+    return sortedFileName;
+}
+
+
+/** LOGIC */

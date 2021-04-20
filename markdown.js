@@ -1,21 +1,44 @@
-const fs = require('fs');
-const markdownpdf = require("markdown-pdf");
+import fs from 'fs';
+import markdownpdf from "markdown-pdf";
 
-const testnotiz = {
-    "title":"Crushing It! EPB (Vaynerchuk, Gary)",
-    "author":"Vaynerchuk, Gary",
-    "note":"Notiz auf Seite 6: testnotiz",
-    "marked":"\"My eight-year old daughter, Misha, wants to be a YouTuber when she grows up. That probably comes as no surprise—many young",
-    "bookmark":	"Lesezeichen auf Seite 22…tellers are observant\""
+
+
+export function createPDFs(notesPath) {
+    console.log("Start creating paths");
+    const notes = JSON.parse(fs.readFileSync(notesPath, 'utf-8'));
+    notes.forEach(note => createPDF(note));
+    console.log("Done creating PDFs");
 }
 
+/**
+ * Create PDF based on the notes provided. 
+ * @param {object} note 
+ */
+function createPDF(note) {
+    let noteCount = 0;
+    let markingCount = 0;
+    let bookmarkCount = 0;
 
-const title = createTitleString("Die Furcht vor der Freiheit (Fromm, Erich)");
-const stats = createStatsString({note: 123, markings: 123, bookmarks: 2});
-const noteString = createNoteString(testnotiz);
-const markingString = createMarkingString(testnotiz);
-const bookmarkString = createBookmarkString(testnotiz);
+    const noteStringArray = [];
+    const markingStringArray = [];
+    const bookmarkStringArray = [];
 
+    note.notes.forEach(note => {
+        if(note.bookmark) {
+            bookmarkStringArray.push(createBookmarkString(note))
+            bookmarkCount += 1;
+        } else if(note.note) {
+            noteStringArray.push(createNoteString(note));
+            noteCount += 1;
+        } else {
+            markingStringArray.push(createMarkingString(note))
+            markingCount += 1;
+        }
+    })
+
+    const title = createTitleString(note.title);
+    const stats = createStatsString({note: noteCount, markings: markingCount, bookmarks: bookmarkCount});
+  
 // Construct Full note
 const fullNote = `
 ${title}
@@ -24,25 +47,30 @@ ${title}
 ${stats}
 
 ## Notes
-${noteString}
+${noteStringArray.join("\n")}
 
 ## Markings
-${markingString}
+${markingStringArray.join("\n")}
 
 ## Bookmarks
-${bookmarkString}
+${bookmarkStringArray.join("\n")}
 `;
 
-const currentDate = new Date();
+const fileTitle = (note.title.replace(/\s/g, "_"));
+const __dirname = fs.realpathSync('.');;
+const markdownPath = __dirname + '/markdown';
+const pdfPath = __dirname + '/pdf';
+const abbrevation = "fullnote"
 
 // Create Markdown File
-fs.writeFileSync(`${currentDate.getTime()}-fullnote.md`, fullNote);
+fs.writeFileSync(markdownPath + `/${fileTitle}-${abbrevation}.md`, fullNote);
 
 // Convert File to PDF
-markdownpdf({cssPath: "custom.css"}).from(`${currentDate.getTime()}-fullnote.md`)
-             .to(`${currentDate.getTime()}-fullnote.pdf`, function () {
-    console.log("Done")
+markdownpdf({cssPath: "custom.css"}).from(markdownPath + `/${fileTitle}-${abbrevation}.md`)
+             .to(pdfPath + `/${fileTitle}-${abbrevation}.pdf`, function () {
+    console.log("Done creating PDF for: ", fileTitle);
 })
+}
 
 /**** CREATE STRINGS */
 

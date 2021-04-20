@@ -1,6 +1,8 @@
 #! /usr/bin/env node
-const fs = require('fs');
-const { program } = require('commander');
+import fs from 'fs';
+import { createSortedJsonFile } from './fileHelper.js';
+import { createPDFs } from './markdown.js';
+import { program } from 'commander';
 
 /*********************************************** EXECUTION CODE ******************************************* */
 
@@ -75,13 +77,17 @@ try {
         return note;
     });
 
-    // console.log("Writing file", {notes});
-
-    const currentDate = new Date();
-
     console.log("Done!");
 
-    fs.writeFileSync(`${currentDate.getTime()}-notes.json`, JSON.stringify(notes));
+    const tmpNotes = "tmp-notes.json"
+    fs.writeFileSync(tmpNotes, JSON.stringify(notes));
+    const sortedFile = createSortedJsonFile(tmpNotes);
+    createPDFs(sortedFile);
+
+    console.log("Deleting temporary files");
+    fs.unlinkSync("tmp-books.json");
+    fs.unlinkSync("tmp-notes.json");
+
 } catch (e) {
     console.log("Error: ", e.stack);
 }

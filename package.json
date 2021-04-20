@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Package that enables you to fastly read and analyze your own tolino notes.",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "note": "node index.js"
