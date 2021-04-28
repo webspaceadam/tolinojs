@@ -56,20 +56,37 @@ ${markingStringArray.join("\n")}
 ${bookmarkStringArray.join("\n")}
 `;
 
-const fileTitle = (note.title.replace(/\s/g, "_"));
-const __dirname = fs.realpathSync('.');;
-const markdownPath = __dirname + '/markdown';
-const pdfPath = __dirname + '/pdf';
-const abbrevation = "fullnote"
+    const fileTitle = (note.title.replace(/\s/g, "_"));
+    const __dirname = fs.realpathSync('.');;
+    const markdownPath = __dirname + '/markdown';
+    const pdfPath = __dirname + '/pdf';
+    const abbrevation = "fullnote"
 
-// Create Markdown File
-fs.writeFileSync(markdownPath + `/${fileTitle}-${abbrevation}.md`, fullNote);
+    if (fs.existsSync(markdownPath) && fs.existsSync(pdfPath)) {
+        console.log('Directory exists!');
 
-// Convert File to PDF
-markdownpdf({cssPath: "custom.css"}).from(markdownPath + `/${fileTitle}-${abbrevation}.md`)
-             .to(pdfPath + `/${fileTitle}-${abbrevation}.pdf`, function () {
-    console.log("Done creating PDF for: ", fileTitle);
-})
+        // Create Markdown File
+        fs.writeFileSync(markdownPath + `/${fileTitle}-${abbrevation}.md`, fullNote);
+
+        // Convert File to PDF
+        markdownpdf({cssPath: "custom.css"}).from(markdownPath + `/${fileTitle}-${abbrevation}.md`)
+                    .to(pdfPath + `/${fileTitle}-${abbrevation}.pdf`, function () {
+            console.log("Done creating PDF for: ", fileTitle);
+        })
+    } else {
+        console.log("Could not find directory. Created /pdf and /markdown");
+        fs.mkdirSync(markdownPath);
+        fs.mkdirSync(pdfPath);
+
+        // Create Markdown File
+        fs.writeFileSync(markdownPath + `/${fileTitle}-${abbrevation}.md`, fullNote);
+
+        // Convert File to PDF
+        markdownpdf({cssPath: "custom.css"}).from(markdownPath + `/${fileTitle}-${abbrevation}.md`)
+                    .to(pdfPath + `/${fileTitle}-${abbrevation}.pdf`, function () {
+            console.log("Done creating PDF for: ", fileTitle);
+        })
+    }
 }
 
 /**** CREATE STRINGS */
